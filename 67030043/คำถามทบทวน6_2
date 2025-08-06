@@ -1,0 +1,22 @@
+1.Multiple Source Files: เหตุใดต้องแยก source code เป็นหลายไฟล์?
+ตอบ เพื่อแยกความรับผิดชอบของโค้ดให้ชัดเจน (โมดูล sensor, display, led แยกกัน) ช่วยให้โค้ดง่ายต่อการเข้าใจ บำรุงรักษา และทดสอบ
+
+2.CMakeLists.txt Management: การเพิ่มไฟล์ source ใหม่ต้องแก้ไขอะไรบ้าง?
+ตอบ เมื่อเพิ่มไฟล์ .c ใหม่ ต้องแก้ SRCS ใน idf_component_register ของ CMakeLists.txt เช่น ใส่ "sensor.c" เพิ่มเข้าไป และหากมี header ใน sub-folder ต้องปรับ INCLUDE_DIRS ให้ครอบคลุม
+
+3.Header Files: บทบาทของไฟล์ .h คืออะไร และทำไมต้องมี?
+ตอบ .h ใช้ประกาศฟังก์ชัน, ค่าคงที่, struct และตัวแปร extern เพื่อให้ไฟล์ .c อื่นสามารถเรียกใช้ได้ โดยไม่ต้องคัดลอกโค้ดซ้ำ
+
+4. Include Directories: เหตุใด CMakeLists.txt ต้องระบุ INCLUDE_DIRS?
+ตอบ ต้องระบุ INCLUDE_DIRS ใน idf_component_register เพื่อบอก CMake ว่า header อยู่ที่ไหน จึงจะ compile ผ่าน เช่น "include" หรือ "." 
+circuitlabs.net
+esp32developer.com
+
+5.Git Ignore: ไฟล์ .gitignore ช่วยอะไรในการจัดการ ESP32 project?
+ตอบ .gitignore ช่วยป้องกันการ commit ไฟล์ build artifacts เช่น build/, .bin, .elf, sdkconfig.old, และโฟลเดอร์ IDE/temporary ให้ repo สะอาด ไม่ใหญ่ และไม่ติดไฟล์ที่สร้างขึ้นโดยอัตโนมัติ
+
+6.Task Management: การใช้ FreeRTOS task ในโมดูล LED ช่วยอะไร?
+ตอบ การสร้าง FreeRTOS task สำหรับโมดูล LED ช่วยให้โค้ดทำงานแบบ asynchronous (เช่น กระพริบ LED บนความถี่เอง) โดยไม่บล็อคงานอื่น ใช้ scheduler จัดการแบบ real‑time
+
+7.Code Organization: ข้อดีของการแยกโมดูล sensor, display, led เป็นไฟล์แยกคืออะไร?
+ตอบ การแยกโมดูล sensor, display, led เป็นไฟล์แยก (และอาจเป็น component) ช่วยให้โค้ดมีความเป็นโมดูล มี API ชัดเจน เปลี่ยนภายหลังได้ง่าย และ reuse ได้ในโปรเจกต์อื่น

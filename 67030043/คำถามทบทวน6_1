@@ -1,0 +1,33 @@
+1. Docker vs Native Setup: อธิบายข้อดีของการใช้ Docker เปรียบเทียบกับการติดตั้ง ESP-IDF บน host system
+ตอบ Docker Setup	                                        Native Setup
+-ไม่ต้องติดตั้ง ESP-IDF ลงบนระบบโดยตรง (แค่ pull Docker image)   -ต้องติดตั้ง dependencies และ ESP-IDF ด้วยตนเอง
+-เหมือนกันทุกเครื่อง (environment consistency)	                -เสี่ยงเกิดปัญหา version mismatch บนเครื่องแต่ละคน
+-ลบออกง่าย ไม่ทิ้งไฟล์ขยะ	                                    -ต้อง clean ด้วยตนเอง อาจมีไฟล์เหลือ
+-ง่ายต่อการ deploy และ replicate บนเครื่องอื่น	                  -การย้ายหรือยกไปใช้กับเครื่องอื่นทำได้ยากกว่า
+
+
+2. nore:ไฟBuild Process:อธิบายขั้นตอนการ build ของ ESP-IDF ใน Docker container ตั้งแต่ source code จนได้ binary
+ตอบ 1.เข้า Docker container → docker-compose exec esp32-dev bash
+    2.โหลด environment ESP-IDF → source $IDF_PATH/export.sh
+    3.ตั้งเป้าหมาย hardware → idf.py set-target esp32
+    4.สร้าง build → idf.py build
+    5.ผลลัพธ์จะถูกสร้างในโฟลเดอร์ build/ เช่น .elf, .bin, .map
+
+
+3. CMake Files:บทบาทของไฟล์ CMakeLists.txt แต่ละไฟล์คืออะไร และทำงานอย่างไรใน Docker environment?
+ตอบ Top-level CMakeLists.txt: ระบุชื่อ project (project(...))
+รวม environment ESP-IDF (include($ENV{IDF_PATH}/tools/cmake/project.cmake))
+main/CMakeLists.txt: ระบุ source file (lab1_basic_build.c)
+กำหนด include path สำหรับ component CMake คือระบบที่จัดการขั้นตอนการ build และ dependency แบบ modular และยืดหยุ่น
+
+
+4. Git Igล์ .gitignore มีความสำคัญอย่างไรสำหรับ ESP32 project development?
+ตอบ ช่วย ป้องกันการ commit ไฟล์ไม่จำเป็น หรือไฟล์ที่เปลี่ยนแปลงบ่อย เช่น:โฟลเดอร์ build/ ไฟล์ binary (.bin, .elf, .map)
+ไฟล์ชั่วคราวของ IDE/editor (.vscode/, .idea/) key ความปลอดภัย (*.pem, *.key) ทำให้ Git repository สะอาด ไม่ใหญ่เกิน และไม่มีข้อมูลลับรั่ว
+
+5. Container Persistence: ข้อมูลใดบ้างที่จะหายไปเมื่อ restart container และข้อมูลใดที่จะอยู่ต่อ?
+ตอบ ข้อมูลที่อยู่ภายใน container เท่านั้นจะหายไปเมื่อ restart เช่น session หรือไฟล์ที่ไม่ได้อยู่ในโฟลเดอร์ที่ mount จาก host แต่ไฟล์ที่อยู่ในโฟลเดอร์ที่ mount เช่น /project จะยังคงอยู่ไม่หาย
+
+6.Development Workflow: เปรียบเทียบ workflow การพัฒนาระหว่างการใช้ Docker กับการทำงานบน native system
+ตอบ การใช้ Docker ทำให้สภาพแวดล้อมการพัฒนาเหมือนกันทุกเครื่อง ไม่ต้องติดตั้ง ESP-IDF 
+และ dependency บนเครื่องจริง ลดปัญหา version mismatch เหมาะกับการทำงานเป็นทีมและเรียนรู้ ในขณะที่ native setup ต้องติดตั้งเองและดูแลหลายอย่าง อาจเกิดปัญหาได้ง่ายกว่า
